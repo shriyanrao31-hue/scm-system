@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pass = document.getElementById('login-pass').value;
     
     try {
-      const res = await fetch(`${API_BASE}/api/auth.php`, {
+      const res = await fetch(`${API_BASE}/api/auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: user, password: pass })
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchInventory() {
     try {
-      const res = await fetch(`${API_BASE}/api/inventory.php?action=list`);
+      const res = await fetch(`${API_BASE}/api/inventory?action=list`);
       const data = await res.json();
       if (data.success) {
         inventoryData = data.inventory;
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchShipments() {
     try {
-      const res = await fetch(`${API_BASE}/api/shipments.php?action=active`);
+      const res = await fetch(`${API_BASE}/api/shipments?action=active`);
       const data = await res.json();
       if (data.success) {
         shipmentsData = data.shipments;
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchPurchaseOrders() {
     try {
-      const res = await fetch(`${API_BASE}/api/purchase_orders.php?action=list`);
+      const res = await fetch(`${API_BASE}/api/purchase_orders?action=list`);
       const data = await res.json();
       if (data.success) {
         poData = data.orders;
@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function simulateStockDeduction(productId, warehouseId, qty = 25) {
     try {
       logEventFeed(`Deducting ${qty} units from Product #${productId}...`);
-      const res = await fetch(`${API_BASE}/api/inventory.php?action=deduct`, {
+      const res = await fetch(`${API_BASE}/api/inventory?action=deduct`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ product_id: productId, warehouse_id: warehouseId, quantity: qty })
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!next) { alert(`PO ${po.po_number} is closed.`); return; }
     if (confirm(`Advance Purchase Order ${po.po_number} to "${next}"?`)) {
       try {
-        const res = await fetch(`${API_BASE}/api/purchase_orders.php?action=update_status`, {
+        const res = await fetch(`${API_BASE}/api/purchase_orders?action=update_status`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: po.id, status: next })
@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const qty = document.getElementById('restock-qty').value;
 
     try {
-      const res = await fetch(`${API_BASE}/api/purchase_orders.php?action=create`, {
+      const res = await fetch(`${API_BASE}/api/purchase_orders?action=create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ warehouse_code: whCode, quantity: parseInt(qty) })
