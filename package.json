@@ -1,0 +1,26 @@
+{
+  "name": "scm-4k-prototype",
+  "version": "1.0.0",
+  "description": "Real-time 4K Supply Chain Management & Logistics Command Center",
+  "scripts": {
+    "zip": "node create-zip.js",
+    "seed": "node database/generate_synthetic_data.js",
+    "realtime": "node real-time-service/server.js",
+    "simulate": "node real-time-service/simulate_telemetry.js"
+  },
+  "keywords": [
+    "scm",
+    "logistics",
+    "gis",
+    "realtime",
+    "telemetry",
+    "php",
+    "socketio",
+    "mysql"
+  ],
+  "author": "SCM Systems Architecture Lead",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

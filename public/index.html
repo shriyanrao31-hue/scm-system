@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SCM & Logistics 4K Command Center</title>
+
+  <!-- Leaflet GIS CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+
+  <!-- Core 4K Glassmorphism HUD Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <script>
+    // Global environment config injection
+    window.SCM_CONFIG = {
+      API_BASE: '',
+      NODE_SERVICE_URL: window.location.hostname === 'localhost' ? 'http://localhost:3000' : ''
+    };
+  </script>
+</head>
+<body>
+
+  <!-- VIEW 1: DYNAMIC HOME SCREEN -->
+  <div id="view-home" class="view-section active">
+    <canvas id="matrix-bg"></canvas>
+    <div class="home-overlay">
+      <h1 class="glitch" data-text="NEXUS COMMAND CENTER">NEXUS COMMAND CENTER</h1>
+      <p class="home-subtitle">ADVANCED SUPPLY CHAIN INTELLIGENCE</p>
+      <button class="btn-jumbo" id="btn-enter-system">INITIALIZE SYSTEM</button>
+    </div>
+  </div>
+
+  <!-- VIEW 2: LOGIN SCREEN -->
+  <div id="view-login" class="view-section">
+    <div class="login-container">
+      <div class="glass-panel login-box">
+        <h2>AUTHORIZED PERSONNEL ONLY</h2>
+        <input type="text" id="login-user" placeholder="Username" value="admin">
+        <input type="password" id="login-pass" placeholder="Password" value="password">
+        <button class="btn-jumbo" id="btn-login-submit" style="font-size: 1.1rem; padding: 12px;">AUTHENTICATE</button>
+        <div id="login-error" style="color: var(--accent-crimson); display: none;">Access Denied.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: MAIN APP DASHBOARD -->
+  <div id="view-app" class="view-section">
+    
+    <!-- TOP TELEMETRY RADAR HEADER -->
+    <header class="hud-header">
+      <div class="hud-brand">
+        <div class="hud-logo-icon"></div>
+        <div>
+          <div class="hud-title">NEXUS SCM COMMAND</div>
+          <div class="hud-badge">4K REAL-TIME TELEMETRY</div>
+        </div>
+      </div>
+      <div class="hud-telemetry-cluster">
+        <div class="telemetry-item">
+          <span class="telemetry-label">UTC CHRONO</span>
+          <span class="telemetry-value" id="hud-live-clock">--:--:-- UTC</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">NETWORK NODES</span>
+          <span class="telemetry-value" id="radar-clients-val">-- NODES</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">TELEMETRY LATENCY</span>
+          <span class="telemetry-value" id="radar-latency-val">--ms</span>
+        </div>
+        <div class="radar-indicator">
+          <span class="pulse-dot" id="radar-pulse-dot"></span>
+          <span style="font-weight: bold;" id="hud-connection-status">CONNECTING...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- APP LAYOUT WITH SIDEBAR -->
+    <div class="app-layout">
+      <!-- SIDEBAR NAVIGATION -->
+      <nav class="sidebar">
+        <div class="nav-item active" data-target="dash-gis">
+          <span>🌍</span> Global Fleet GIS
+        </div>
+        <div class="nav-item" data-target="dash-inventory">
+          <span>📦</span> Inventory Analytics
+        </div>
+        <div class="nav-item" data-target="dash-procurement">
+          <span>🛒</span> Procurement Pipeline
+        </div>
+        <div class="nav-item" data-target="dash-telemetry">
+          <span>📡</span> System Telemetry
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div class="nav-item" id="btn-logout" style="color: var(--accent-crimson);">
+          <span>🚪</span> Terminate Session
+        </div>
+      </nav>
+
+      <!-- DASHBOARD CONTENTS -->
+      <main class="main-content">
+        
+        <!-- Dashboard 1: GIS Fleet Tracking -->
+        <div id="dash-gis" class="dash-section active">
+          <section class="glass-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">GLOBAL FLEET TRACKING & ROUTING</h2>
+              <span class="hud-badge">LIVE GPS INGESTION</span>
+            </div>
+            <div class="stats-strip">
+              <div class="stat-box">
+                <span class="stat-label">ACTIVE TRUCKS</span>
+                <span class="stat-number" id="stat-active-trucks">--</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">CRITICAL SKUS</span>
+                <span class="stat-number" style="color: var(--accent-crimson);" id="stat-critical-skus">--</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">ACTIVE POs</span>
+                <span class="stat-number" style="color: var(--accent-amber);" id="stat-active-pos">--</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-label">INVENTORY VAL</span>
+                <span class="stat-number" style="color: var(--accent-emerald);" id="stat-inventory-val">--</span>
+              </div>
+            </div>
+            <div id="gis-map"></div>
+          </section>
+        </div>
+
+        <!-- Dashboard 2: Inventory Analytics -->
+        <div id="dash-inventory" class="dash-section">
+          <div class="inventory-grid">
+            <section class="glass-panel">
+              <div class="panel-header">
+                <h2 class="panel-title">STOCK LEVELS VS REORDER POINT (ROP)</h2>
+                <span class="hud-badge">EOQ OPTIMIZED</span>
+              </div>
+              <div style="padding: 16px; height: 350px; position: relative;">
+                <canvas id="stockAnalysisChart"></canvas>
+              </div>
+            </section>
+            <section class="glass-panel">
+              <div class="panel-header">
+                <h2 class="panel-title">HEALTH DISTRIBUTION</h2>
+              </div>
+              <div style="padding: 16px; height: 350px; position: relative;">
+                <canvas id="inventoryStatusDonut"></canvas>
+              </div>
+            </section>
+          </div>
+          <section class="glass-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">WAREHOUSE INVENTORY CATALOG</h2>
+              <button class="hud-btn" id="btn-quick-deduct">⚡ Simulate Stock Breach</button>
+            </div>
+            <div style="overflow-x: auto; max-height: 400px;">
+              <table class="hud-table">
+                <thead>
+                  <tr>
+                    <th>SKU</th>
+                    <th>PRODUCT NAME</th>
+                    <th>WH</th>
+                    <th>ON HAND</th>
+                    <th>ROP</th>
+                    <th>EOQ</th>
+                    <th>STATUS</th>
+                    <th>ACTION</th>
+                  </tr>
+                </thead>
+                <tbody id="inventory-table-body">
+                  <tr><td colspan="8">Loading Inventory Data...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- Dashboard 3: Procurement Pipeline -->
+        <div id="dash-procurement" class="dash-section">
+          <section class="glass-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">PROCUREMENT KANBAN PIPELINE</h2>
+              <span class="hud-badge">CLICK CARD TO ADVANCE</span>
+            </div>
+            <div class="kanban-board">
+              <div class="kanban-column">
+                <div class="kanban-col-header" style="color: var(--accent-cyan);">
+                  <span>DRAFT</span><span class="hud-badge" id="kanban-count-draft">0</span>
+                </div>
+                <div class="kanban-cards-wrapper" id="kanban-cards-draft"></div>
+              </div>
+              <div class="kanban-column">
+                <div class="kanban-col-header" style="color: var(--accent-amber);">
+                  <span>ISSUED</span><span class="hud-badge" id="kanban-count-issued">0</span>
+                </div>
+                <div class="kanban-cards-wrapper" id="kanban-cards-issued"></div>
+              </div>
+              <div class="kanban-column">
+                <div class="kanban-col-header" style="color: #38bdf8;">
+                  <span>IN TRANSIT</span><span class="hud-badge" id="kanban-count-in-transit">0</span>
+                </div>
+                <div class="kanban-cards-wrapper" id="kanban-cards-in-transit"></div>
+              </div>
+              <div class="kanban-column">
+                <div class="kanban-col-header" style="color: var(--accent-emerald);">
+                  <span>RECEIVED</span><span class="hud-badge" id="kanban-count-received">0</span>
+                </div>
+                <div class="kanban-cards-wrapper" id="kanban-cards-received"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Dashboard 4: System Telemetry -->
+        <div id="dash-telemetry" class="dash-section">
+          <section class="glass-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">RAW TELEMETRY & SYSTEM EVENT STREAM</h2>
+              <span class="hud-badge">REAL-TIME INGESTION</span>
+            </div>
+            <div class="hud-event-feed" id="hud-event-feed">
+              <div class="event-entry">
+                <span class="event-time">[BOOT]</span>
+                <span>Connecting to high-speed Socket.io telemetry cluster...</span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: MANUAL RESTOCK PO -->
+  <div id="modal-restock" class="modal-overlay">
+    <div class="glass-panel modal-content">
+      <h2 style="color: var(--accent-cyan); border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 15px;">Create Manual Restock PO</h2>
+      
+      <div>
+        <label style="color: var(--text-secondary); font-size: 0.9rem;">Select SKU / Warehouse</label>
+        <select id="restock-sku" class="hud-input"></select>
+      </div>
+      
+      <div>
+        <label style="color: var(--text-secondary); font-size: 0.9rem;">Order Quantity</label>
+        <input type="number" id="restock-qty" class="hud-input" value="100" min="1">
+      </div>
+      
+      <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="hud-btn hud-btn-danger" id="btn-cancel-restock">Cancel</button>
+        <button class="hud-btn" id="btn-submit-restock" style="background: var(--accent-cyan); color: #000; font-weight: bold;">Place Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Third-Party Vendor Libraries via CDN -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  <!-- Application Modules -->
+  <script src="js/tracking.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/websocket.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
