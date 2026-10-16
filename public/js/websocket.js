@@ -5,8 +5,15 @@
 
 class TelemetryRadarClient {
   constructor(serviceUrl = null) {
-    // Auto-detect service URL or fallback to localhost:3000
-    this.serviceUrl = serviceUrl || window.SCM_CONFIG?.NODE_SERVICE_URL || (
+    // Auto-detect service URL: query param (?node=...), localStorage, SCM_CONFIG, or fallback
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramUrl = urlParams.get('node');
+    if (paramUrl) {
+      localStorage.setItem('SCM_NODE_URL', paramUrl);
+    }
+    const storedUrl = localStorage.getItem('SCM_NODE_URL');
+
+    this.serviceUrl = serviceUrl || paramUrl || storedUrl || window.SCM_CONFIG?.NODE_SERVICE_URL || (
       window.location.hostname === 'localhost' ? 'http://localhost:3000' : window.location.origin
     );
     this.socket = null;

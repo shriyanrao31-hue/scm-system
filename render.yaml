@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: scm-telemetry-service
+    env: node
+    plan: free
+    rootDir: real-time-service
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: CORS_ORIGIN
+        value: "*"
