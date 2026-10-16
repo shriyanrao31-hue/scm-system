@@ -63,10 +63,22 @@ document.addEventListener('DOMContentLoaded', () => {
     switchView('view-login');
   });
 
-  document.getElementById('btn-login-submit').addEventListener('click', async () => {
-    const user = document.getElementById('login-user').value;
-    const pass = document.getElementById('login-pass').value;
-    
+  async function handleLogin() {
+    const user = (document.getElementById('login-user').value || '').trim();
+    const pass = (document.getElementById('login-pass').value || '').trim();
+    const errEl = document.getElementById('login-error');
+
+    if (errEl) errEl.style.display = 'none';
+
+    // Strict validation: Reject any password other than 123456
+    if (pass !== '123456') {
+      if (errEl) {
+        errEl.innerText = 'Access Denied: Invalid password.';
+        errEl.style.display = 'block';
+      }
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/api/auth`, {
         method: 'POST',
@@ -79,14 +91,29 @@ document.addEventListener('DOMContentLoaded', () => {
         switchView('view-app');
         initApp();
       } else {
-        document.getElementById('login-error').style.display = 'block';
+        if (errEl) {
+          errEl.innerText = data.message || 'Access Denied: Invalid password.';
+          errEl.style.display = 'block';
+        }
       }
     } catch (e) {
-      console.warn("Auth failed, falling back to instant bypass for local mode.");
-      clearInterval(matrixInterval);
-      switchView('view-app');
-      initApp();
+      // Offline fallback: only allow if pass === '123456'
+      if (pass === '123456') {
+        clearInterval(matrixInterval);
+        switchView('view-app');
+        initApp();
+      } else {
+        if (errEl) {
+          errEl.innerText = 'Access Denied: Invalid password.';
+          errEl.style.display = 'block';
+        }
+      }
     }
+  }
+
+  document.getElementById('btn-login-submit').addEventListener('click', handleLogin);
+  document.getElementById('login-pass').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleLogin();
   });
 
   document.getElementById('btn-logout').addEventListener('click', () => {

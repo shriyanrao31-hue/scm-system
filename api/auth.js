@@ -9,11 +9,21 @@ export default function handler(req, res) {
   }
 
   const body = req.body || {};
-  
-  res.status(200).json({
-    success: true,
-    message: 'Authentication successful.',
-    token: 'mock-jwt-token-123',
-    user: { id: 1, username: body.username || 'admin', role: 'admin' }
+  const username = (body.username || '').trim();
+  const password = (body.password || '').trim();
+
+  // Enforce single authorized password: 123456
+  if (password === '123456') {
+    return res.status(200).json({
+      success: true,
+      message: 'Authentication successful.',
+      token: 'jwt-auth-session-123456',
+      user: { id: 1, username: username || 'admin', role: 'admin' }
+    });
+  }
+
+  return res.status(401).json({
+    success: false,
+    message: 'Access Denied: Invalid password.'
   });
 }
