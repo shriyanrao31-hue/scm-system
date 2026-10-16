@@ -19,6 +19,7 @@
     }
   ],
   "env": {
-    "DB_PORT": "3306"
+    "DB_PORT": "3306",
+    "NODE_SERVICE_URL": "https://scm-system-9qc7.onrender.com"
   }
 }

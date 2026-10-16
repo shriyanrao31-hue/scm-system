@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const nodeUrl = process.env.NODE_SERVICE_URL || 'http://localhost:3000';
+  const nodeUrl = process.env.NODE_SERVICE_URL || 'https://scm-system-9qc7.onrender.com';
   const endpoint = nodeUrl.replace(/\/$/, '') + '/api/events/publish';
 
   const { event, payload } = req.body || {};
